@@ -1,9 +1,9 @@
 # プロジェクト概要
 
 <!-- PROJECT-CONFIG
-repository_name=
-app_name=
-app_dir=
+repository_name=team2project
+app_name=team2project
+app_dir=team2project
 -->
 
 ## 開発者（GitHub名）
@@ -11,6 +11,10 @@ app_dir=
 `/init-project` が、GitHubから取得した最新の Collaborator 一覧でこのブロックを更新する。各Issueの担当者はGitHub上で管理する。
 
 <!-- COLLABORATORS: START -->
+- e1b24033
+- e1b24099-lang
+- HigoRyuudai
+- potato1126
 <!-- COLLABORATORS: END -->
 
 ## 開発するアプリケーションの条件
