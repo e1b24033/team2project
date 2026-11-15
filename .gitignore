@@ -2,9 +2,6 @@
 **/build/
 /build/
 
-# Gradle wrapper
-gradle/wrapper/
-
 # Gradle caches
 .gradle/
 
@@ -38,6 +35,8 @@ docs/temp/
 *.jar
 *.war
 *.ear
+# Gradle wrapper の jar は clone 後の ./gradlew 実行に必要なため管理する
+!**/gradle/wrapper/gradle-wrapper.jar
 
 # Native binaries
 bin/
