@@ -38,4 +38,21 @@ validate_sections() {
 }
 
 validate_issue_body() { validate_sections "$1" ISSUE_HEADINGS ISSUE_REQUIRED; }
-validate_pr_body() { validate_sections "$1" PR_HEADINGS PR_REQUIRED; }
+validate_pr_body() {
+  local file="$1"
+  local related_heading_count
+  related_heading_count="$(awk '$0 == "## 関連Issue" { count++ } END { print count + 0 }' "$file")"
+
+  if [[ "$related_heading_count" -eq 0 ]] && awk '
+    /^## / { exit }
+    /#[0-9]+/ { found = 1 }
+    END { exit(found ? 0 : 1) }
+  ' "$file"; then
+    local legacy_headings=( 変更内容 AC確認結果 テスト結果 )
+    local legacy_required=( 変更内容 AC確認結果 テスト結果 )
+    validate_sections "$file" legacy_headings legacy_required
+    return
+  fi
+
+  validate_sections "$file" PR_HEADINGS PR_REQUIRED
+}
