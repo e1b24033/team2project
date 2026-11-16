@@ -76,6 +76,21 @@ class GameRoomControllerTest {
   }
 
   @Test
+  void joinWhenRoomIsFullShowsErrorOnTopPage() throws Exception {
+    mockMvc.perform(post("/room/join").param("name", "alice").with(csrf()));
+    mockMvc.perform(post("/room/join").param("name", "bob").with(csrf()));
+    mockMvc.perform(post("/room/join").param("name", "carol").with(csrf()));
+    mockMvc.perform(post("/room/join").param("name", "dave").with(csrf()));
+
+    mockMvc.perform(post("/room/join").param("name", "erin").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(view().name("index.html"))
+        .andExpect(content().string(containsString("満員です。これ以上参加できません。")));
+
+    assertEquals(4, gameRoom.getPlayerCount());
+  }
+
+  @Test
   void joinWithoutCsrfTokenIsForbidden() throws Exception {
     mockMvc.perform(post("/room/join").param("name", "mallory"))
         .andExpect(status().isForbidden())

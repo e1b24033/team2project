@@ -30,10 +30,15 @@ public class GameRoomController {
       return "index.html";
     }
 
-    Player player = gameRoomService.join(playerName);
-    model.addAttribute("player", player);
-    model.addAttribute("players", gameRoomService.getPlayers());
-    return "room.html";
+    try {
+      Player player = gameRoomService.join(playerName);
+      model.addAttribute("player", player);
+      model.addAttribute("players", gameRoomService.getPlayers());
+      return "room.html";
+    } catch (IllegalStateException e) {
+      model.addAttribute("errorMessage", e.getMessage());
+      return "index.html";
+    }
   }
 
   @GetMapping("/room")
