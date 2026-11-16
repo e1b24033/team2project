@@ -31,6 +31,31 @@ public class GameRoomService {
     return gameRoom.canStart();
   }
 
+  public synchronized StartResult startGame() {
+    if (gameRoom.isStarted()) {
+      return StartResult.failure("すでにゲームは開始されています。");
+    }
+    if (gameRoom.getPlayerCount() < GameRoom.MIN_PLAYERS) {
+      return StartResult.failure("ゲームを開始するには2人以上の参加が必要です。");
+    }
+    gameRoom.setStarted(true);
+    return StartResult.ok();
+  }
+
+  public synchronized boolean isStarted() {
+    return gameRoom.isStarted();
+  }
+
+  public record StartResult(boolean success, String message) {
+    public static StartResult ok() {
+      return new StartResult(true, null);
+    }
+
+    public static StartResult failure(String message) {
+      return new StartResult(false, message);
+    }
+  }
+
   // 呼び出し側が一覧を直接書き換えないよう、コピーを返す
   public synchronized List<Player> getPlayers() {
     return List.copyOf(gameRoom.getPlayers());

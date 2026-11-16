@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>参加画面</title>
+  <meta http-equiv="refresh" content="3" th:if="${autoRefresh}">
 </head>
 
 <body>
@@ -15,6 +16,12 @@
     <li th:each="p : ${players}" th:text="${p.name}"></li>
   </ul>
   <p th:if="${#lists.isEmpty(players)}">まだ参加者はいません。</p>
+  <p th:if="${errorMessage}" id="start-error" th:text="${errorMessage}" style="color:red"></p>
+  <p th:if="${started}" id="game-started">ゲームが開始されました。</p>
+
+  <form th:unless="${started}" th:action="@{/room/start}" method="post">
+    <button type="submit" id="start-button">ゲーム開始</button>
+  </form>
 
   <a th:href="@{/room}">参加者一覧を更新</a>
   <a th:href="@{/}">トップへ戻る</a>

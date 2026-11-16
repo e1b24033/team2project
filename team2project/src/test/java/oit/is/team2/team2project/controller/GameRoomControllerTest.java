@@ -9,6 +9,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +100,82 @@ class GameRoomControllerTest {
         .andExpect(content().string(not(containsString("mallory"))));
 
     assertEquals(0, gameRoom.getPlayerCount());
+  }
+
+  // 開始AC1: 2人で開始すると、別のリクエストからも開始済みと分かる
+  @Test
+  void startWithTwoPlayersMarksRoomAsStarted() throws Exception {
+    mockMvc.perform(post("/room/join").param("name", "alice").with(csrf()));
+    mockMvc.perform(post("/room/join").param("name", "bob").with(csrf()));
+
+    mockMvc.perform(post("/room/start").with(csrf()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/room"));
+
+    assertTrue(gameRoom.isStarted());
+
+    mockMvc.perform(get("/room"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("ゲームが開始されました。")));
+  }
+
+  // 開始AC1: 上限の4人でも開始できる
+  @Test
+  void startWithFourPlayersIsAllowed() throws Exception {
+    for (String n : new String[] { "a", "b", "c", "d" }) {
+      mockMvc.perform(post("/room/join").param("name", n).with(csrf()));
+    }
+
+    mockMvc.perform(post("/room/start").with(csrf()))
+        .andExpect(status().is3xxRedirection());
+
+    assertTrue(gameRoom.isStarted());
+  }
+
+  // 開始AC2: 1人では開始されず、理由が表示される
+  @Test
+  void startWithOnePlayerShowsReasonAndDoesNotStart() throws Exception {
+    mockMvc.perform(post("/room/join").param("name", "alice").with(csrf()));
+
+    mockMvc.perform(post("/room/start").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(view().name("room.html"))
+        .andExpect(content().string(containsString("ゲームを開始するには2人以上の参加が必要です。")))
+        .andExpect(content().string(not(containsString("ゲームが開始されました。"))));
+
+    assertFalse(gameRoom.isStarted());
+  }
+
+  // 開始AC2: 0人でも開始されない
+  @Test
+  void startWithNoPlayersShowsReasonAndDoesNotStart() throws Exception {
+    mockMvc.perform(post("/room/start").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("ゲームを開始するには2人以上の参加が必要です。")));
+
+    assertFalse(gameRoom.isStarted());
+  }
+
+  // すでに開始済みなら二重に開始しない
+  @Test
+  void startTwiceShowsAlreadyStartedMessage() throws Exception {
+    mockMvc.perform(post("/room/join").param("name", "alice").with(csrf()));
+    mockMvc.perform(post("/room/join").param("name", "bob").with(csrf()));
+    mockMvc.perform(post("/room/start").with(csrf()));
+
+    mockMvc.perform(post("/room/start").with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("すでにゲームは開始されています。")));
+  }
+
+  @Test
+  void startWithoutCsrfTokenIsForbidden() throws Exception {
+    mockMvc.perform(post("/room/join").param("name", "alice").with(csrf()));
+    mockMvc.perform(post("/room/join").param("name", "bob").with(csrf()));
+
+    mockMvc.perform(post("/room/start"))
+        .andExpect(status().isForbidden());
+
+    assertFalse(gameRoom.isStarted());
   }
 }
