@@ -18,9 +18,17 @@ public class GameRoomService {
   }
 
   public synchronized Player join(String name) {
+    if (gameRoom.getPlayerCount() >= GameRoom.MAX_PLAYERS) {
+      throw new IllegalStateException("満員です。これ以上参加できません。");
+    }
+
     Player player = new Player(name);
     gameRoom.addPlayer(player);
     return player;
+  }
+
+  public synchronized boolean canStart() {
+    return gameRoom.canStart();
   }
 
   // 呼び出し側が一覧を直接書き換えないよう、コピーを返す
