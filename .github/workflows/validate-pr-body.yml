@@ -21,5 +21,6 @@ jobs:
       - name: PR本文の必須項目を検査する
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: printf '%s' "$PR_BODY" | bash scripts/pr/validate-body.sh --stdin --check-related-issues
+        run: |
+          gh pr view "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --json body --jq .body > "$RUNNER_TEMP/pr-body.md"
+          bash scripts/pr/validate-body.sh "$RUNNER_TEMP/pr-body.md" --check-related-issues
