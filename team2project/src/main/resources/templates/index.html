@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <title>ゲームルーム</title>
+</head>
+
+<body>
+  <h1>ゲームルーム</h1>
+  <p th:if="${errorMessage}" th:text="${errorMessage}" class="error"></p>
+  <form th:action="@{/room/join}" method="post">
+    <label for="name">プレイヤー名</label>
+    <input type="text" id="name" name="name" required>
+    <button type="submit">参加</button>
+  </form>
+</body>
+
+</html>

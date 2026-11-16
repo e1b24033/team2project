@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <title>参加画面</title>
+</head>
+
+<body>
+  <h1>参加画面</h1>
+  <p th:if="${player}" id="joined-player">[[${player.name}]] さんが参加しました。</p>
+
+  <h2>参加者一覧（[[${#lists.size(players)}]]人）</h2>
+  <ul id="players">
+    <li th:each="p : ${players}" th:text="${p.name}"></li>
+  </ul>
+  <p th:if="${#lists.isEmpty(players)}">まだ参加者はいません。</p>
+
+  <a th:href="@{/room}">参加者一覧を更新</a>
+  <a th:href="@{/}">トップへ戻る</a>
+</body>
+
+</html>
