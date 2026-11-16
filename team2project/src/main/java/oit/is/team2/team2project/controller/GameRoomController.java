@@ -34,6 +34,7 @@ public class GameRoomController {
       Player player = gameRoomService.join(playerName);
       model.addAttribute("player", player);
       model.addAttribute("players", gameRoomService.getPlayers());
+      model.addAttribute("started", gameRoomService.isStarted());
       return "room.html";
     } catch (IllegalStateException e) {
       model.addAttribute("errorMessage", e.getMessage());
@@ -41,9 +42,23 @@ public class GameRoomController {
     }
   }
 
+  @PostMapping("/room/start")
+  public String start(ModelMap model) {
+    GameRoomService.StartResult result = gameRoomService.startGame();
+    if (result.success()) {
+      return "redirect:/room";
+    }
+    model.addAttribute("errorMessage", result.message());
+    model.addAttribute("players", gameRoomService.getPlayers());
+    model.addAttribute("started", gameRoomService.isStarted());
+    return "room.html";
+  }
+
   @GetMapping("/room")
   public String room(ModelMap model) {
     model.addAttribute("players", gameRoomService.getPlayers());
+    model.addAttribute("started", gameRoomService.isStarted());
+    model.addAttribute("autoRefresh", true);
     return "room.html";
   }
 }
