@@ -45,11 +45,20 @@ fi
 validate_pr_body "$BODY_FILE"
 
 if [[ "$CHECK_RELATED_ISSUES" == true ]]; then
-  RELATED_SECTION="$(awk '
-    $0 == "## 関連Issue" { in_section = 1; next }
-    in_section && /^## / { exit }
-    in_section { print }
-  ' "$BODY_FILE")"
+  RELATED_HEADING_COUNT="$(awk '$0 == "## 関連Issue" { count++ } END { print count + 0 }' "$BODY_FILE")"
+
+  if [[ "$RELATED_HEADING_COUNT" -eq 1 ]]; then
+    RELATED_SECTION="$(awk '
+      $0 == "## 関連Issue" { in_section = 1; next }
+      in_section && /^## / { exit }
+      in_section { print }
+    ' "$BODY_FILE")"
+  else
+    RELATED_SECTION="$(awk '
+      /^## / { exit }
+      { print }
+    ' "$BODY_FILE")"
+  fi
 
   if printf '%s\n' "$RELATED_SECTION" | grep -Eiq '(^|[^[:alnum:]])(fixes|resolves)[[:space:]]+#[0-9]+'; then
     echo "エラー: Issueを完了させる表記は『Closes #番号』だけを使ってください。" >&2
