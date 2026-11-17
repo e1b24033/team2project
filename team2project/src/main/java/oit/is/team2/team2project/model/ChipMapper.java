@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface ChipMapper {
@@ -13,4 +14,7 @@ public interface ChipMapper {
 
   @Select("SELECT playerName, balance FROM chip WHERE playerName = #{playerName}")
   Chip selectByPlayerName(@Param("playerName") String playerName);
+
+  @Update("UPDATE chip SET balance = #{balance} WHERE playerName = #{playerName}")
+  int updateBalance(@Param("playerName") String playerName, @Param("balance") int balance);
 }

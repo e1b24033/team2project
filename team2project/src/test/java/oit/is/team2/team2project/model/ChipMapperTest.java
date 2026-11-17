@@ -39,4 +39,23 @@ class ChipMapperTest {
     assertEquals("mapper-select", chip.getPlayerName());
     assertEquals(1250, chip.getBalance());
   }
+
+  @Test
+  void 残高を更新すると保存済みの残高が指定値に変わる() {
+    jdbcTemplate.update("INSERT INTO chip (playerName, balance) VALUES (?, ?)", "mapper-update", 500);
+
+    int updatedRows = chipMapper.updateBalance("mapper-update", 1200);
+
+    assertEquals(1, updatedRows);
+    Integer storedBalance = jdbcTemplate.queryForObject(
+        "SELECT balance FROM chip WHERE playerName = ?", Integer.class, "mapper-update");
+    assertEquals(1200, storedBalance);
+  }
+
+  @Test
+  void 存在しないプレイヤーを更新すると更新件数は0になる() {
+    int updatedRows = chipMapper.updateBalance("nonexistent-player", 999);
+
+    assertEquals(0, updatedRows);
+  }
 }
